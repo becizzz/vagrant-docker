@@ -37,10 +37,6 @@ RUN mysql_install_db && chown -R mysql:mysql /var/lib/mysql && (/usr/bin/mysqld_
 RUN pear channel-discover pear.drush.org
 RUN pear install drush/drush
 
-# Set up SASS
-RUN apt-get -qqy install ruby
-RUN gem install sass
-
 # Set up Supervisor
 RUN apt-get -qqy install supervisor
 ADD conf/ubuntu-lamp.conf /etc/supervisor/conf.d/ubuntu-lamp.conf
