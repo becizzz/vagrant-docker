@@ -120,21 +120,22 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   #
   #   chef.validation_client_name = "ORGNAME-validator"
 
-  config.vm.define "vagrant-docker" do |vd|
-    vd.vm.synced_folder "./www", "/var/www"
-    vd.vm.synced_folder "./db", "/db"
-
-    vd.vm.provider "docker" do |d|
-      d.build_dir = "./Docker"
-      d.ports = "49000:80", "49001:22", "49002:3306"
-      d.name = "vagrant-www"
-      d.vagrant_vagrantfile = "./Vagrantfile.proxy"
-    end
-
+  # Set the name of the VM.
+  config.vm.provider "virtualbox" do |v|
+    v.name = "vagrant-docker-host"
   end
 
-  
+  # We should implement bridging so that we can set separate addresses for containers.
+  config.vm.network :private_network, ip: "192.168.50.55"
 
-  
+  config.vm.box = "ubuntu/trusty64"
+  config.vm.provision "docker"
+  config.vm.provision "shell", inline: "ps aux | grep 'sshd:' | awk '{print $2}' | xargs kill"
+
+  # Set up port forwarding
+  # This covers all of the ports that Docker uses when auto publishing exposed ports.
+  for i in 49000..49900
+    config.vm.network "forwarded_port", guest: i, host: i
+  end
 
 end
